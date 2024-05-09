@@ -16,7 +16,7 @@ namespace EnglishHelpRecordatory
         private Panel panelSearch;
         private TextBox textBoxSearch;
         public event EventHandler<string> textChanged;
-        private Boolean isChanged;
+        private bool isChanged;
         public SearchBar()
         {
             isChanged = false;
@@ -40,7 +40,6 @@ namespace EnglishHelpRecordatory
 
             lupa.BackColor = Color.Transparent;
             lupa.Enabled = false;
-            //lupa.Image = (Image)resources.GetObject("Lupa.Image");
             lupa.Location = new Point(-10, 3);
             lupa.Margin = new Padding(3, 2, 3, 2);
             lupa.Name = "Lupa";

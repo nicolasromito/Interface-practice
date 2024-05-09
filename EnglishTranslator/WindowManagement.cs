@@ -14,8 +14,9 @@ namespace EnglishHelpRecordatory
         public readonly Button maximize;
         private readonly Button theme;
         public readonly Button logo;
-        public event EventHandler<bool> ButtonClicked;
-
+        public event EventHandler<bool> ButtonCloseClicked;
+        public event EventHandler<bool> ButtonMinimizeClicked;
+        public event EventHandler<bool> ButtonMaximizeClicked;
         public WindowManagement(Panel panelTop, Button close, Button minimize, Button maximize, Button theme, Button logo)
         {
             this.panelTop = panelTop;
@@ -25,7 +26,9 @@ namespace EnglishHelpRecordatory
             this.theme = theme;
             this.logo = logo;
 
-            this.close.Click += button1_Click_1;
+            this.close.Click += buttonClose_Click;
+            this.minimize.Click += ButtonMinimize_Click;
+            this.maximize.Click += ButtonMaximize_Click;
             this.logo = logo;
         }
         public Panel GetPanelTop()
@@ -39,23 +42,26 @@ namespace EnglishHelpRecordatory
         {
             Image resizedImage = new Bitmap(image, new Size(imageWidth, imageHeight));
 
-            // Asignar la imagen al botón
             buton.Image = resizedImage;
 
-            // Establecer el tamaño del botón para que coincida con el tamaño de la imagen
             buton.Size = new Size(buttonWidth, buttonHeight);
         }
-        //private void UpdateTopPanelButtons()
-        //{
 
-        //    close.Location = new Point(this.ClientSize.Width - 44, close.Location.Y);
-        //    panelTop.Size = new Size(this.ClientSize.Width, panelTop.Size.Height);
-        //}
 
-        private void button1_Click_1(object sender, EventArgs e)
+        private void buttonClose_Click(object sender, EventArgs e)
         {
-            ButtonClicked?.Invoke(this,true);
+            ButtonCloseClicked?.Invoke(this,true);
         }
+        private void ButtonMaximize_Click(object sender, EventArgs e)
+        {
+            ButtonMaximizeClicked?.Invoke(this, true);
+        }
+
+        private void ButtonMinimize_Click(object sender, EventArgs e)
+        {
+            ButtonMinimizeClicked?.Invoke(this, true);
+        }
+
 
         public void ChangeColorButton(Button button, Color color1, Color color2)
         {
@@ -63,14 +69,12 @@ namespace EnglishHelpRecordatory
             button.MouseEnter += (sender, e) =>
             {
                 button.BackColor = color2;
-                // Ajustar el estilo del botón
                 button.FlatStyle = FlatStyle.Flat;
                 button.FlatAppearance.BorderSize = 0;
 
-                // Forzar el redibujado del botón para que se aplique el gradiente
                 button.Invalidate();
             };
-            // Manejador de evento para MouseLeave
+
             button.MouseLeave += (sender, e) =>
             {
                 button.BackColor = color1;
@@ -78,7 +82,6 @@ namespace EnglishHelpRecordatory
                 button.FlatStyle = FlatStyle.Flat;
                 button.FlatAppearance.BorderSize = 0;
 
-                // Forzar el redibujado del botón para que se aplique el gradiente
                 button.Invalidate();
             };
 
@@ -87,11 +90,15 @@ namespace EnglishHelpRecordatory
             button.FlatStyle = FlatStyle.Flat;
             button.FlatAppearance.BorderSize = 0;
 
-            // Forzar el redibujado del botón para que se aplique el gradiente
             button.Invalidate();
 
         }
+        public void panelSize(Size windowsSize)
+        {
+            panelTop.Size = windowsSize;
+            close.Location = new Point(windowsSize.Width - 44,0);
+            maximize.Location = new Point(windowsSize.Width - 88, 0);
+            minimize.Location = new Point(windowsSize.Width - 128, 0);
+        }
     }
-
-
 }

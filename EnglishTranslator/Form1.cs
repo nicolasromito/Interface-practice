@@ -10,12 +10,12 @@ using Timer = System.Windows.Forms.Timer;
 using EnglishHelpRecordatory.Properties;
 using System.Resources;
 using System.Windows.Forms;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EnglishHelpRecordatory
 {
     public partial class Form1 : Form
     {
-        //private LinearGradientBrush gradientBrush;
 
         private bool isDragging = false;
         private Point lastCursorPos;
@@ -30,12 +30,14 @@ namespace EnglishHelpRecordatory
         private const int HTBOTTOM = 0xF;
         private const int HTBOTTOMLEFT = 0x10;
         private const int HTBOTTOMRIGHT = 0x11;
-
+        private bool manualMaximized = false;
+        private Rectangle normalBounds;
         //Colores
         private Color yellow = Color.FromArgb(236, 243, 174);
         private Color blue = Color.FromArgb(54, 57, 83);
         private Color darkBlue = Color.FromArgb(14, 17, 43);
         private Color red = Color.FromArgb(240, 25, 25);
+
         //Variables de clase
         private FlowLayoutPanel panelButtonSearch;
         private List<Button> buttons;
@@ -49,13 +51,14 @@ namespace EnglishHelpRecordatory
         private TextBox english;
         private TextBox spanish;
         private Panel panelAddNuewWord;
-        private Button add;
-        private Boolean isAddPanelEneable;
+        private Button add2;
+        private bool isAddPanelEneable;
         //Classes
         private ButtonBox panelButtonInitializer;
         private WordsList listGrid;
         private WindowManagement windowsTopPanel;
-        private AddWord addWordPanel;
+        private Words_ABM addWordPanel;
+        private Words_ABM modifyWordPanel;
         private SearchBar searchBar;
         public Form1()
         {
@@ -84,7 +87,9 @@ namespace EnglishHelpRecordatory
             ExecuteAddWordPanel();
             ExecuteSearchBar();
             panelButtonInitializer.ButtonClicked += ButtonBox_ButtonClicked;
-            windowsTopPanel.ButtonClicked += ButtonClose_ButtonClicked;
+            windowsTopPanel.ButtonCloseClicked += ButtonClose_ButtonClicked;
+            windowsTopPanel.ButtonMinimizeClicked += ButtonMinimize_ButtonClicked;
+            windowsTopPanel.ButtonMaximizeClicked += ButtonMaximize_ButtonClicked;
             searchBar.textChanged += RefreshList_TextChanged;
             panelTop.MouseDown += Form_MouseDown;
             panelTop.MouseMove += Form_MouseMove;
@@ -163,6 +168,36 @@ namespace EnglishHelpRecordatory
             this.Close();
         }
 
+
+        private void ButtonMaximize_ButtonClicked(object sender, bool data)
+        {
+            if (!manualMaximized)
+            {
+                normalBounds = this.Bounds;
+
+                MaximizeForm();
+                manualMaximized = true;
+            }
+            else
+            {
+                this.Bounds = normalBounds;
+                manualMaximized = false;
+            }
+        }
+
+        private void MaximizeForm()
+        {
+            Rectangle workingArea = Screen.GetWorkingArea(this);
+
+            this.Size = new Size(workingArea.Width, workingArea.Height - SystemInformation.CaptionHeight);
+            this.Location = new Point(workingArea.Left, workingArea.Top);
+        }
+
+        private void ButtonMinimize_ButtonClicked(object sender, bool data)
+        {
+            WindowState = FormWindowState.Minimized;
+        }
+
         //  Funciones para la Clase WindowManagement - Botones de manejo de la ventana de windows    ///////////////////////////
 
         //  Funciones para la Clase SearchBar - Barra de busqueda    ///////////////////////////
@@ -174,7 +209,7 @@ namespace EnglishHelpRecordatory
             this.Controls.Add(searchBar.GetSearchBar());
         }
 
-        private void RefreshList_TextChanged(object sender, String data)
+        private void RefreshList_TextChanged(object sender, System.String data)
         {
             listGrid.LoadList(data);
         }
@@ -187,18 +222,28 @@ namespace EnglishHelpRecordatory
             panelAddNuewWord = new Panel();
             english = new TextBox();
             spanish = new TextBox();
-            add = new Button();
+            add2 = new Button();
             panelAddNuewWord.Controls.Add(english);
             panelAddNuewWord.Controls.Add(spanish);
-            panelAddNuewWord.Controls.Add(add);
+            panelAddNuewWord.Controls.Add(add2);
         }
         private void ExecuteAddWordPanel()
         {
-            addWordPanel = new AddWord();
+            addWordPanel = new Words_ABM(0);
+            modifyWordPanel = new Words_ABM(1);
 
             addWordPanel.panelAddNuewWord.Visible = false;
             addWordPanel.panelAddNuewWord.Enabled = false;
+
+            modifyWordPanel.panelAddNuewWord.Visible = false;
+            modifyWordPanel.panelAddNuewWord.Enabled = false;
+
+            ButtonImageSize(add, 25, 25);
+            ButtonImageSize(modify, 25, 25);
+            ButtonImageSize(delete, 25, 25);
+
             this.Controls.Add(addWordPanel.GetPanel());
+            this.Controls.Add(modifyWordPanel.GetPanel());
         }
 
         //  Funciones para la Clase AddWord - Textbox  para agregar palabras al list    ///////////////////////////
@@ -334,45 +379,115 @@ namespace EnglishHelpRecordatory
         private void Form1_Resize(object sender, EventArgs e)
         {
             this.Invalidate();
-            if (listGrid != null)
+            if (listGrid != null && windowsTopPanel != null)
             {
                 listGrid.UpdateListBoxItemSize(this.ClientSize);
+                windowsTopPanel.panelSize(new Size(this.Size.Width, 53));
             }
+            UpdateButtonsPosition();
+        }
 
+        public void UpdateButtonsPosition()
+        {
+            add.Location = new Point(ClientSize.Width - 86, add.Location.Y);
+            modify.Location = new Point(ClientSize.Width - 122, modify.Location.Y);
+            delete.Location = new Point(ClientSize.Width - 158, delete.Location.Y);
         }
         // Resize    /////////////////////////////////////////////////////
 
         // Paint    /////////////////////////////////////////////////////
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            // Definir los colores del degradado
-            Color color1 = Color.FromArgb(14, 17, 43);
-            Color color2 = Color.FromArgb(34, 47, 73);
+            if (this.ClientRectangle.Width > 0 && this.ClientRectangle.Height > 0)
+            {
+                Color color1 = Color.FromArgb(14, 17, 43);
+                Color color2 = Color.FromArgb(34, 47, 73);
 
-            // Crear un objeto de tipo LinearGradientBrush
-            LinearGradientBrush gradientBrush = new LinearGradientBrush(
-                this.ClientRectangle,
-                color1,
-                color2,
-                LinearGradientMode.Vertical); // Modo vertical para el degradado
+                LinearGradientBrush gradientBrush = new LinearGradientBrush(
+                    this.ClientRectangle,
+                    color1,
+                    color2,
+                    LinearGradientMode.Vertical); 
 
-            // Dibujar el degradado en el área del formulario
-            e.Graphics.FillRectangle(gradientBrush, this.ClientRectangle);
+                e.Graphics.FillRectangle(gradientBrush, this.ClientRectangle);
+            }
+        }
+
+        private void add_MouseEnter(object sender, EventArgs e)
+        {
+            if (!isAddPanelEneable)
+            {
+                add.BackColor = blue;
+                add.Image = Properties.Resources.plusWhite;
+                ButtonImageSize(add, 25, 25);
+            }
+        }
+
+        private void modify_MouseEnter(object sender, EventArgs e)
+        {
+            if (!isAddPanelEneable)
+            {
+                modify.BackColor = blue;
+                modify.Image = Properties.Resources.modifyWhite;
+                ButtonImageSize(modify, 25, 25);
+            }
+        }
+
+        private void delete_MouseEnter(object sender, EventArgs e)
+        {
+            delete.BackColor = blue;
+            delete.Image = Properties.Resources.deleteWhite;
+            ButtonImageSize(delete, 25, 25);
+        }
+
+        private void add_MouseLeave(object sender, EventArgs e)
+        {
+            if (!isAddPanelEneable)
+            {
+                add.BackColor = Color.Transparent;
+                add.Image = Properties.Resources.plusWhite;
+                ButtonImageSize(add, 25, 25);
+            }
+        }
+
+        private void modify_MouseLeave(object sender, EventArgs e)
+        {
+            if (!isAddPanelEneable)
+            {
+                modify.BackColor = Color.Transparent;
+                modify.Image = Properties.Resources.modifyWhite;
+                ButtonImageSize(modify, 25, 25);
+            }
+        }
+
+        private void delete_MouseLeave(object sender, EventArgs e)
+        {
+            delete.BackColor = Color.Transparent;
+            delete.Image = Properties.Resources.deleteWhite;
+            ButtonImageSize(delete, 25, 25);
+
         }
 
         // Paint    /////////////////////////////////////////////////////
 
         // buttons    /////////////////////////////////////////////////////
-        private void button1_Click_1(object sender, EventArgs e)
+        private void add_Click(object sender, EventArgs e)
         {
             if (isAddPanelEneable)
             {
+                add.BackColor = blue;
+                add.Image = Properties.Resources.plusWhite;
+                ButtonImageSize(add, 25, 25);
                 addWordPanel.panelAddNuewWord.Visible = false;
                 addWordPanel.panelAddNuewWord.Enabled = false;
                 isAddPanelEneable = false;
+                listGrid.LoadList("");
             }
             else
             {
+                add.BackColor = yellow;
+                add.Image = Properties.Resources.plusBlack;
+                ButtonImageSize(add, 25, 25);
                 addWordPanel.panelAddNuewWord.BackColor = blue;
                 addWordPanel.panelAddNuewWord.BringToFront();
                 addWordPanel.panelAddNuewWord.Size = new Size(400, 100);
@@ -383,9 +498,57 @@ namespace EnglishHelpRecordatory
                 addWordPanel.panelAddNuewWord.Enabled = true;
                 isAddPanelEneable = true;
             }
-           
+
         }
 
+        private void modify_Click(object sender, EventArgs e)
+        {
+            if (isAddPanelEneable)
+            {
+                modify.BackColor = blue;
+                modify.Image = Properties.Resources.modifyWhite;
+                ButtonImageSize(modify, 25, 25);
+                modifyWordPanel.panelAddNuewWord.Visible = false;
+                modifyWordPanel.panelAddNuewWord.Enabled = false;
+                isAddPanelEneable = false;
+                listGrid.LoadList("");
+            }
+            else
+            {
+                modify.BackColor = yellow;
+                modify.Image = Properties.Resources.modifyBlack;
+                ButtonImageSize(modify, 25, 25);
+                modifyWordPanel.english.Text = listGrid.word.English;
+                modifyWordPanel.spanish.Text = listGrid.word.Spanish;
+                modifyWordPanel.word.English = listGrid.word.English;
+                modifyWordPanel.word.Spanish = listGrid.word.Spanish;
+                modifyWordPanel.panelAddNuewWord.BackColor = blue;
+                modifyWordPanel.panelAddNuewWord.BringToFront();
+                modifyWordPanel.panelAddNuewWord.Size = new Size(400, 100);
+                modifyWordPanel.panelAddNuewWord.Location = new Point(1038, 122);
+                modifyWordPanel.panelAddNuewWord.BorderStyle = BorderStyle.FixedSingle;
+                ControlPaint.DrawBorder(modifyWordPanel.panelAddNuewWord.CreateGraphics(), modifyWordPanel.panelAddNuewWord.ClientRectangle, Color.Red, ButtonBorderStyle.Solid);
+                modifyWordPanel.panelAddNuewWord.Visible = true;
+                modifyWordPanel.panelAddNuewWord.Enabled = true;
+                isAddPanelEneable = true;
+            }
+        }
+
+        private void delete_Click(object sender, EventArgs e)
+        {
+            modifyWordPanel.word.English = listGrid.word.English;
+            modifyWordPanel.word.Spanish = listGrid.word.Spanish;
+            modifyWordPanel.delete_Click();
+            listGrid.LoadList("");
+        }
+
+        public void ButtonImageSize(Button buton, int imageWidth, int imageHeight)
+        {
+            Image resizedImage = new Bitmap(buton.Image, new Size(imageWidth, imageHeight));
+
+            buton.Image = resizedImage;
+
+        }
         // buttons    /////////////////////////////////////////////////////
     }
 }

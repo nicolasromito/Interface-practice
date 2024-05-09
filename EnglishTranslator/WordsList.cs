@@ -7,19 +7,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Windows.Forms;
+using System.Globalization;
 
 namespace EnglishHelpRecordatory
 {
     internal class WordsList
     {
-        //private readonly List<Object> list;
         private DataGridView list;
+        public Word word;
 
         public WordsList(DataGridView list)
         {
             this.list = list;
             this.list.MouseWheel += list_MouseWheel;
             this.list.CellPainting += list_CellPainting;
+            this.list.CellClick += DataGridView1_CellClick;
+            word = new Word();
         }
         public DataGridView GetList()
         {
@@ -30,15 +34,13 @@ namespace EnglishHelpRecordatory
         {
             try
             {
-                // Leer el contenido del archivo JSON
                 string jsonFilePath = "data.json";
                 string json = File.ReadAllText(jsonFilePath);
-
-                // Deserializar el JSON a una lista de objetos
+        
                 List<Word> dataList = JsonConvert.DeserializeObject<List<Word>>(json);
 
-                // Establecer la fuente de datos del DataGridView
-                list.DataSource = dataList;
+                List<Word> palabrasFiltradas = dataList.Where(w => w.English.ToLower().StartsWith(texto.ToLower())).ToList();// || w.Spanish.ToLower().Contains(texto.ToLower())).ToList();
+                list.DataSource = palabrasFiltradas.OrderBy(w => w.English).ToList();
 
                 foreach (DataGridViewColumn column in list.Columns)
                 {
@@ -92,7 +94,29 @@ namespace EnglishHelpRecordatory
             //}
 
         }
-        private void list_MouseWheel(object sender, MouseEventArgs e)  //Poder hacer scroll en la lista
+
+        public void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e) 
+        {
+            try
+            {
+                if (e.RowIndex != -1 && e.ColumnIndex != -1)
+                {
+                    DataGridViewRow filaSeleccionada = list.Rows[e.RowIndex];
+
+                    string campo1 = filaSeleccionada.Cells["English"].Value.ToString();
+                    string campo2 = filaSeleccionada.Cells["Spanish"].Value.ToString();
+
+                    word.English = campo1;
+                    word.Spanish = campo2;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al manejar el evento de doble clic en el DataGridView: " + ex.Message);
+            }
+
+        }
+        private void list_MouseWheel(object sender, MouseEventArgs e)
         {
             if (e.Delta > 0 && list.FirstDisplayedScrollingRowIndex > 0)
             {

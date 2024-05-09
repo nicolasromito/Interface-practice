@@ -34,21 +34,55 @@ namespace EnglishHelpRecordatory
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            openAddWordsPanel = new Button();
+            add = new Button();
+            modify = new Button();
+            delete = new Button();
             SuspendLayout();
             // 
-            // openAddWordsPanel
+            // add
             // 
-            openAddWordsPanel.Location = new Point(1402, 85);
-            openAddWordsPanel.Name = "openAddWordsPanel";
-            openAddWordsPanel.Size = new Size(36, 36);
-            openAddWordsPanel.BackColor = Color.FromArgb(236, 243, 174);
-            openAddWordsPanel.FlatStyle = FlatStyle.Flat;
-            openAddWordsPanel.FlatAppearance.BorderSize = 0;
-            openAddWordsPanel.TabIndex = 12;
-            openAddWordsPanel.UseVisualStyleBackColor = true;
-            openAddWordsPanel.Click += button1_Click_1;
+            add.BackColor = Color.Transparent;
+            add.FlatAppearance.BorderSize = 0;
+            add.FlatStyle = FlatStyle.Flat;
+            add.Image = Properties.Resources.plusWhite;
+            add.Location = new Point(1402, 85);
+            add.Name = "add";
+            add.Size = new Size(36, 36);
+            add.TabIndex = 12;
+            add.UseVisualStyleBackColor = true;
+            add.Click += add_Click;
+            add.MouseEnter += add_MouseEnter;
+            add.MouseLeave += add_MouseLeave;
+            // 
+            // modify
+            // 
+            modify.BackColor = Color.Transparent;
+            modify.FlatAppearance.BorderSize = 0;
+            modify.FlatStyle = FlatStyle.Flat;
+            modify.Image = Properties.Resources.modifyWhite;
+            modify.Location = new Point(1366, 85);
+            modify.Name = "modify";
+            modify.Size = new Size(36, 36);
+            modify.TabIndex = 12;
+            modify.UseVisualStyleBackColor = true;
+            modify.Click += modify_Click;
+            modify.MouseEnter += modify_MouseEnter;
+            modify.MouseLeave += modify_MouseLeave;
+            // 
+            // delete
+            // 
+            delete.BackColor = Color.Transparent;
+            delete.FlatAppearance.BorderSize = 0;
+            delete.FlatStyle = FlatStyle.Flat;
+            delete.Image = Properties.Resources.deleteWhite;
+            delete.Location = new Point(1330, 85);
+            delete.Name = "delete";
+            delete.Size = new Size(36, 36);
+            delete.TabIndex = 12;
+            delete.UseVisualStyleBackColor = true;
+            delete.Click += delete_Click;
+            delete.MouseEnter += delete_MouseEnter;
+            delete.MouseLeave += delete_MouseLeave;
             // 
             // Form1
             // 
@@ -56,7 +90,9 @@ namespace EnglishHelpRecordatory
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(14, 17, 43);
             ClientSize = new Size(1488, 920);
-            Controls.Add(openAddWordsPanel);
+            Controls.Add(delete);
+            Controls.Add(modify);
+            Controls.Add(add);
             Margin = new Padding(3, 2, 3, 2);
             MinimumSize = new Size(1488, 920);
             Name = "Form1";
@@ -65,10 +101,11 @@ namespace EnglishHelpRecordatory
             Paint += Form1_Paint;
             Resize += Form1_Resize;
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
-        private Button openAddWordsPanel;
+        private Button add;
+        private Button modify;
+        private Button delete;
     }
 }
